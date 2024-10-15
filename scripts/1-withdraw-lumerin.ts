@@ -7,7 +7,7 @@ import { config } from "../utils/config";
 async function main() {
   const [client] = await viem.getWalletClients();
 
-  const account = privateKeyToAccount(await config.vestingContractPrivateKey());
+  const account = privateKeyToAccount(await config.privateKey());
 
   const vesting = getContract({
     abi: multiABI,

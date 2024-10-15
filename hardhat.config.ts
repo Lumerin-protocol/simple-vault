@@ -6,8 +6,14 @@ import "@nomicfoundation/hardhat-ignition-viem";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 
-if (!process.env.ETH_NODE_ADDRESS) {
-  throw new Error("ETH_NODE_ADDRESS env variable is not set");
+const isMainnet = process.argv.includes("--network") && process.argv.includes("mainnet");
+if (isMainnet) {
+  if (!process.env.PRIVATE_KEY) {
+    throw new Error("PRIVATE_KEY env variable is not set");
+  }
+  if (!process.env.ETH_NODE_ADDRESS) {
+    throw new Error("ETH_NODE_ADDRESS env variable is not set");
+  }
 }
 
 const config: HardhatUserConfig = {
@@ -28,9 +34,14 @@ const config: HardhatUserConfig = {
     // reporter: "",
   },
   networks: {
-    mainnet: {
-      url: process.env.ETH_NODE_ADDRESS,
-    },
+    ...(isMainnet
+      ? {
+          mainnet: {
+            accounts: [process.env.PRIVATE_KEY!],
+            url: process.env.ETH_NODE_ADDRESS,
+          },
+        }
+      : {}),
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,

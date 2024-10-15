@@ -49,7 +49,10 @@ async function main() {
       account: address,
     });
 
-    addressAmountMap.set(address, vested - released);
+    const remaining = vested - released;
+    if (remaining > 0n) {
+      addressAmountMap.set(address, remaining);
+    }
   }
 
   const addressAmount = Array.from(addressAmountMap.entries());
@@ -59,4 +62,9 @@ async function main() {
   console.log(`Saved to ${config.filename}`);
 }
 
-main();
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

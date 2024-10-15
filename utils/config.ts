@@ -28,10 +28,10 @@ export const config = {
       validator: isAddress,
     });
   },
-  vestingContractPrivateKey() {
+  privateKey() {
     return getVar<`0x${string}`>({
-      envName: "VESTING_CONTRACT_PRIVATE_KEY",
-      prompt: "Enter vesting contract private key",
+      envName: "PRIVATE_KEY",
+      prompt: "Enter private key",
       validator: async (x) => {
         if (x === "") {
           throw new Error("Value is empty");

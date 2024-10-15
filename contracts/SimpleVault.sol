@@ -17,7 +17,7 @@ contract SimpleVault is Ownable {
   error NoAddressesProvided();
   error ZeroBalance();
 
-  constructor(address _token) Ownable(msg.sender) {
+  constructor(address _token) Ownable(_msgSender()) {
     token = IERC20(_token);
   }
 
@@ -37,11 +37,11 @@ contract SimpleVault is Ownable {
       totalAmount += amounts[i];
       balances[users[i]] += amounts[i];
     }
-    token.safeTransferFrom(msg.sender, address(this), totalAmount);
+    token.safeTransferFrom(_msgSender(), address(this), totalAmount);
   }
 
   function claim(uint256 amount) public {
-    uint256 balance = balances[msg.sender];
+    uint256 balance = balances[_msgSender()];
     if (balance == 0) {
       revert ZeroBalance();
     }
@@ -51,8 +51,8 @@ contract SimpleVault is Ownable {
     if (amount == 0) {
       amount = balance;
     }
-    balances[msg.sender] -= amount;
-    token.safeTransfer(msg.sender, amount);
+    balances[_msgSender()] -= amount;
+    token.safeTransfer(_msgSender(), amount);
   }
 
   function batchCancel(address[] calldata users) public onlyOwner {
@@ -67,7 +67,7 @@ contract SimpleVault is Ownable {
       revert ZeroBalance();
     }
 
-    token.safeTransfer(msg.sender, totalAmount);
+    token.safeTransfer(_msgSender(), totalAmount);
   }
 
   function balanceOf(address user) public view returns (uint256) {

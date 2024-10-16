@@ -1,8 +1,8 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { catchError } from "../utils/error";
-import { zeroAddress } from "viem";
-import { deployContractFixture } from "./fixtures";
+import { maxUint256, zeroAddress } from "viem";
+import { deployContractFixture, depositFixture } from "./fixtures";
 
 describe("Deposit", () => {
   it("should deposit", async () => {
@@ -103,5 +103,20 @@ describe("Deposit", () => {
         account: aliceAddr,
       });
     });
+  });
+
+  it("should error with overflow if attempting to deposit large amount", async () => {
+    const { lmr, vault, alice } = await loadFixture(depositFixture);
+    const aliceAddr = alice.account.address;
+    const amount = maxUint256;
+
+    await lmr.write.approve([vault.address, amount]);
+
+    try{
+      await vault.write.batchDeposit([[aliceAddr], [amount]]);
+      expect.fail("Should have thrown");
+    } catch (e) {
+      expect((e as Error)?.message).includes("reverted with panic code 0x11");
+    }
   });
 });

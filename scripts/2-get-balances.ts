@@ -15,7 +15,7 @@ async function main() {
     startblock: "0",
     endblock: "99999999",
     page: "1",
-    offset: "10",
+    offset: "9000",
     // sort: "asc",
     apikey: await config.etherscanApiKey(),
   });
@@ -24,6 +24,8 @@ async function main() {
   const txs = await fetch(url)
     .then((res) => res.json())
     .then((res) => res.result as { hash: `0x${string}` }[]);
+
+  console.log(`Collected ${txs.length} transactions`);
 
   const pc = await viem.getPublicClient();
   const addresses = await getClaimentAddresses(

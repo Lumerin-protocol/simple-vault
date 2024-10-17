@@ -34,14 +34,10 @@ const config: HardhatUserConfig = {
     // reporter: "",
   },
   networks: {
-    ...(isMainnet
-      ? {
-          mainnet: {
-            accounts: [process.env.PRIVATE_KEY!],
-            url: process.env.ETH_NODE_ADDRESS,
-          },
-        }
-      : {}),
+    mainnet: {
+      accounts: [process.env.PRIVATE_KEY!],
+      url: process.env.ETH_NODE_ADDRESS,
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
@@ -57,6 +53,12 @@ const config: HardhatUserConfig = {
     L1Etherscan: process.env.ETHERSCAN_API_KEY,
     L1: "ethereum",
   },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  },
+  sourcify: {
+    enabled: true,
+  }
 };
 
 export default config;

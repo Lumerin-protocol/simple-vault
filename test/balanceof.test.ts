@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { depositFixture } from "./fixtures";
+import { deployContractFixture, depositFixture } from "./fixtures";
 
 describe("BalanceOf", () => {
   it("should return correct balance", async () => {
@@ -18,5 +18,31 @@ describe("BalanceOf", () => {
 
     const balance = await vault.read.balanceOf([carol.account.address]);
     expect(balance).to.equal(0n);
+  });
+
+  it("should return correct balance for multiple deposits in separate transactions", async () => {
+    const { lmr, vault, alice } = await loadFixture(deployContractFixture);
+    const aliceAddr = alice.account.address;
+    const amount = 1000n;
+
+    await lmr.write.approve([vault.address, amount * 2n]);
+    await vault.write.batchDeposit([[aliceAddr], [amount]]);
+    await vault.write.batchDeposit([[aliceAddr], [amount]]);
+
+    expect(await vault.read.balanceOf([aliceAddr])).to.equal(amount * 2n);
+  });
+
+  it("should return correct balance if the same address is deposited multiple times in the same transaction", async () => {
+    const { lmr, vault, alice } = await loadFixture(deployContractFixture);
+    const aliceAddr = alice.account.address;
+    const amount = 1000n;
+
+    await lmr.write.approve([vault.address, amount * 2n]);
+    await vault.write.batchDeposit([
+      [aliceAddr, aliceAddr],
+      [amount, amount],
+    ]);
+
+    expect(await vault.read.balanceOf([aliceAddr])).to.equal(amount * 2n);
   });
 });

@@ -1,7 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { catchError } from "../utils/error";
-import { maxUint256, zeroAddress } from "viem";
+import { getAddress, maxUint256, zeroAddress } from "viem";
 import { deployContractFixture, depositFixture } from "./fixtures";
 
 describe("Deposit", () => {
@@ -24,30 +24,22 @@ describe("Deposit", () => {
     expect(bobBalance).to.equal(amounts[1]);
   });
 
-  it("should sum multiple deposits in separate transactions", async () => {
-    const { lmr, vault, alice } = await loadFixture(deployContractFixture);
-    const aliceAddr = alice.account.address;
-    const amount = 1000n;
+  it("should emit events", async () => {
+    const { lmr, vault, alice, bob } = await loadFixture(deployContractFixture);
+    const addresses = [alice.account.address, bob.account.address];
+    const amounts = [1000n, 2000n];
+    const totalAmount = amounts.reduce((a, b) => a + b, 0n);
 
-    await lmr.write.approve([vault.address, amount * 2n]);
-    await vault.write.batchDeposit([[aliceAddr], [amount]]);
-    await vault.write.batchDeposit([[aliceAddr], [amount]]);
+    await lmr.write.approve([vault.address, totalAmount]);
+    const tx = await vault.write.batchDeposit([addresses, amounts]);
 
-    expect(await vault.read.balanceOf([aliceAddr])).to.equal(amount * 2n);
-  });
+    const aliceEvents = await vault.getEvents.Deposit({user: alice.account.address})
+    expect(aliceEvents.length).to.equal(1);
+    expect(aliceEvents[0].args).to.deep.include({ amount: amounts[0]});
 
-  it("should work if the same address is deposited multiple times in the same transaction", async () => {
-    const { lmr, vault, alice } = await loadFixture(deployContractFixture);
-    const aliceAddr = alice.account.address;
-    const amount = 1000n;
-
-    await lmr.write.approve([vault.address, amount * 2n]);
-    await vault.write.batchDeposit([
-      [aliceAddr, aliceAddr],
-      [amount, amount],
-    ]);
-
-    expect(await vault.read.balanceOf([aliceAddr])).to.equal(amount * 2n);
+    const bobEvents = await vault.getEvents.Deposit({user: bob.account.address})
+    expect(bobEvents.length).to.equal(1);
+    expect(bobEvents[0].args).to.deep.include({ amount: amounts[1]});
   });
 
   it("should error if zero address is provided", async () => {

@@ -16,7 +16,7 @@ async function main() {
   });
 
   const lmr = await viem.getContractAt("ERC20", await config.lumerinTokenAddress());
-  const balance = await lmr.read.balanceOf([account.address]);
+  const balance = await lmr.read.balanceOf([vesting.address]);
 
   await vesting.write.transferLumerinOut([account.address, balance]);
 }

@@ -20,7 +20,7 @@ describe("ClaimedAmount", () => {
   it("should return correct claimed amount when claimed all available balance", async () => {
     const { alice, vault, amounts } = await loadFixture(depositFixture);
 
-    await vault.write.claim([0n], {account:alice.account});
+    await vault.write.claim([0n], { account: alice.account });
     const claimedAmount = await vault.read.claimedAmount([alice.account.address]);
 
     expect(claimedAmount).to.equal(amounts[0]);
@@ -31,8 +31,8 @@ describe("ClaimedAmount", () => {
     const claim1 = amounts[0] / 2n;
     const claim2 = amounts[0] - claim1;
 
-    await vault.write.claim([claim1], {account:alice.account});
-    await vault.write.claim([claim2], {account:alice.account});
+    await vault.write.claim([claim1], { account: alice.account });
+    await vault.write.claim([claim2], { account: alice.account });
 
     const claimedAmount = await vault.read.claimedAmount([alice.account.address]);
     expect(claimedAmount).to.equal(amounts[0]);

@@ -58,7 +58,7 @@ const config: HardhatUserConfig = {
   },
   sourcify: {
     enabled: true,
-  }
+  },
 };
 
 export default config;

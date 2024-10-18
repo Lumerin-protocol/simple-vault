@@ -55,10 +55,12 @@ async function main() {
   }
 }
 
-main().then(()=>{
-  console.log("All done");
-  process.exit(0);
-}).catch((err) => {
-  console.error("Script error:", err?.cause?.data || err?.cause || err);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    console.log("All done");
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("Script error:", err?.cause?.data || err?.cause || err);
+    process.exit(1);
+  });

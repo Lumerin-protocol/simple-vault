@@ -1,8 +1,9 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { catchError } from "../utils/error";
-import { getAddress, maxUint256, zeroAddress } from "viem";
+import { maxUint256, padHex, zeroAddress } from "viem";
 import { deployContractFixture, depositFixture } from "./fixtures";
+import crypto from "node:crypto";
 
 describe("Deposit", () => {
   it("should deposit", async () => {
@@ -33,13 +34,13 @@ describe("Deposit", () => {
     await lmr.write.approve([vault.address, totalAmount]);
     const tx = await vault.write.batchDeposit([addresses, amounts]);
 
-    const aliceEvents = await vault.getEvents.Deposit({user: alice.account.address})
+    const aliceEvents = await vault.getEvents.Deposit({ user: alice.account.address });
     expect(aliceEvents.length).to.equal(1);
-    expect(aliceEvents[0].args).to.deep.include({ amount: amounts[0]});
+    expect(aliceEvents[0].args).to.deep.include({ amount: amounts[0] });
 
-    const bobEvents = await vault.getEvents.Deposit({user: bob.account.address})
+    const bobEvents = await vault.getEvents.Deposit({ user: bob.account.address });
     expect(bobEvents.length).to.equal(1);
-    expect(bobEvents[0].args).to.deep.include({ amount: amounts[1]});
+    expect(bobEvents[0].args).to.deep.include({ amount: amounts[1] });
   });
 
   it("should error if zero address is provided", async () => {
@@ -104,7 +105,7 @@ describe("Deposit", () => {
 
     await lmr.write.approve([vault.address, amount]);
 
-    try{
+    try {
       await vault.write.batchDeposit([[aliceAddr], [amount]]);
       expect.fail("Should have thrown");
     } catch (e) {
@@ -112,3 +113,34 @@ describe("Deposit", () => {
     }
   });
 });
+
+describe("Gas estimation for deposit", () => {
+  it("should calculate gas for deposit", async () => {
+    const { lmr, vault } = await loadFixture(deployContractFixture);
+    const batchSize = 100;
+    const addresses = repeatFn(randomAddress, batchSize);
+    const amounts = repeat(4080_00000000n, batchSize);
+    const totalAmount = amounts.reduce((a, b) => a + b, 0n);
+
+    await lmr.write.approve([vault.address, totalAmount]);
+    const gas = await vault.estimateGas.batchDeposit([addresses, amounts]);
+
+    console.log("Gas used for depositing 100 addresses: ", gas.toString());
+  });
+});
+
+function repeat<T>(v: T, n: number): T[] {
+  return Array(n).fill(v);
+}
+
+function repeatFn<T>(fn: () => T, n: number): T[] {
+  return Array(n).fill(0).map(fn);
+}
+
+function randomAddress(): `0x${string}` {
+  return getHex(crypto.randomBytes(20), 20);
+}
+
+function getHex(buffer: Buffer, padding = 32): `0x${string}` {
+  return padHex(`0x${buffer.toString("hex")}`, { size: padding });
+}

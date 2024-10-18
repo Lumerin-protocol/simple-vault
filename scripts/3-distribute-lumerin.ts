@@ -1,5 +1,5 @@
 import { viem } from "hardhat";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import "../utils/bigint-json";
 import { config } from "../utils/config";
 import { prompt } from "../utils/prompt";
@@ -36,20 +36,29 @@ async function main() {
   await prompt(`Continue with depositing user funds?`);
 
   for (let i = 0; i < addrs.length; i += batchSize) {
-    const addrsSlice = addrs.slice(i, i + batchSize);
-    const amountsSlice = amounts.slice(i, i + batchSize);
-    const tx = await vault.write.batchDeposit([addrsSlice, amountsSlice]);
-    await pc.waitForTransactionReceipt({ hash: tx });
-    console.log(
-      `Batch deposited. First address: ${addrsSlice[0]}, last address: ${addrsSlice[addrsSlice.length - 1]}, next index: ${i + batchSize}`,
-    );
+    try {
+      const addrsSlice = addrs.slice(i, i + batchSize);
+      const amountsSlice = amounts.slice(i, i + batchSize);
+      const tx = await vault.write.batchDeposit([addrsSlice, amountsSlice]);
+      console.log("Transaction submitted:", tx, "\nWaiting for confirmation...");
+      await pc.waitForTransactionReceipt({ hash: tx });
+      console.log(
+        `Batch deposited. First address: ${addrsSlice[0]}, last address: ${addrsSlice[addrsSlice.length - 1]}, next index: ${i + batchSize}`,
+      );
+    } catch (e) {
+      const unprocessedAddressAmount = addressAmount.slice(i);
+      console.log("Unprocessed addresses are written to unprocessed.json");
+      const unprocessedData = JSON.stringify(unprocessedAddressAmount, null, 2);
+      writeFileSync("unprocessed.json", unprocessedData);
+      throw e;
+    }
   }
-
-  console.log("All done");
 }
 
-main().catch((err) => {
-  console.error(err);
-  console.error("CAUSESESE", err.cause);
-  console.error("CAUSESESE", err.cause.data.abiItem);
+main().then(()=>{
+  console.log("All done");
+  process.exit(0);
+}).catch((err) => {
+  console.error("Script error:", err?.cause?.data || err?.cause || err);
+  process.exit(1);
 });

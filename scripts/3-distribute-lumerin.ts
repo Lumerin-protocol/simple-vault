@@ -25,7 +25,7 @@ async function main() {
 
   const pc = await viem.getPublicClient();
   const vault = await viem.getContractAt("SimpleVault", await config.vaultAddress());
-  const batchSize = 300;
+  const batchSize = 100;
 
   await prompt(`Approve ${totalAmount} tokens to vault?`);
   const token = await viem.getContractAt("ERC20", await config.lumerinTokenAddress());

@@ -8,9 +8,9 @@ import "solidity-coverage";
 
 const isMainnet = process.argv.includes("--network") && process.argv.includes("mainnet");
 if (isMainnet) {
-  if (!process.env.PRIVATE_KEY) {
-    throw new Error("PRIVATE_KEY env variable is not set");
-  }
+  // if (!process.env.PRIVATE_KEY) {
+  //   throw new Error("PRIVATE_KEY env variable is not set");
+  // }
   if (!process.env.ETH_NODE_ADDRESS) {
     throw new Error("ETH_NODE_ADDRESS env variable is not set");
   }

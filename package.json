@@ -30,6 +30,7 @@
     "@types/mocha": "^10.0.9",
     "@types/node": "^22.7.5",
     "@types/yargs-parser": "^21.0.3",
+    "@wagmi/cli": "^2.1.16",
     "chai": "^4.2.0",
     "hardhat": "^2.22.13",
     "hardhat-gas-reporter": "^2.2.1",
@@ -40,9 +41,7 @@
     "solidity-coverage": "^0.8.13",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
-    "viem": "^2.21.25"
-  },
-  "dependencies": {
+    "viem": "^2.21.25",
     "yargs-parser": "^21.1.1"
   }
 }

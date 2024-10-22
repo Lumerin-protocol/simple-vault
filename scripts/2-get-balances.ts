@@ -2,7 +2,7 @@ import { writeFileSync } from "fs";
 import { viem } from "hardhat";
 import { multiABI } from "../utils/vesting-abi";
 import "../utils/bigint-json";
-import { getClaimentAddresses } from "../utils/parse-txs";
+import { getClaimentAddresses, getClaimentAddresses2 } from "../utils/parse-txs";
 import { config } from "../utils/config";
 
 async function main() {
@@ -14,24 +14,30 @@ async function main() {
     address: vestingAddress,
     startblock: "0",
     endblock: "99999999",
-    page: "1",
-    offset: "9000",
+    page: "0",
+    offset: "0",
     // sort: "asc",
     apikey: await config.etherscanApiKey(),
   });
   url.search = params.toString();
 
+  console.log(url.toString());
+  // return;
+
   const txs = await fetch(url)
     .then((res) => res.json())
-    .then((res) => res.result as { hash: `0x${string}` }[]);
+    .then((res) => res.result as { input: `0x${string}` }[]);
 
   console.log(`Collected ${txs.length} transactions`);
 
   const pc = await viem.getPublicClient();
-  const addresses = await getClaimentAddresses(
+  const addresses = await getClaimentAddresses2(
     pc,
-    txs.map((x) => x.hash),
+    txs,
   );
+
+  console.log(`Collected ${addresses.size} addresses`);
+  return;
 
   const addressAmountMap = new Map<`0x${string}`, bigint>();
 

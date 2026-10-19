@@ -18,3 +18,7 @@ ignition/deployments/chain-31337
 
 address-amounts.*
 unprocessed.*
+
+# Local analysis output
+__*.json
+.DS_Store
